@@ -55,6 +55,7 @@ class InteractiveControllerPrompt(object):
         has_object_actions=True,
         image_dir=".",
         image_per_frame=False,
+        move_step_size=0.25
     ):
         self.default_actions = default_actions
         self.has_object_actions = has_object_actions
@@ -63,10 +64,10 @@ class InteractiveControllerPrompt(object):
         self.counter = 0
 
         default_interact_commands = {
-            "\x1b[C": dict(action="MoveRight", moveMagnitude=0.25),
-            "\x1b[D": dict(action="MoveLeft", moveMagnitude=0.25),
-            "\x1b[A": dict(action="MoveAhead", moveMagnitude=0.25),
-            "\x1b[B": dict(action="MoveBack", moveMagnitude=0.25),
+            "\x1b[C": dict(action="MoveRight", moveMagnitude=move_step_size),
+            "\x1b[D": dict(action="MoveLeft", moveMagnitude=move_step_size),
+            "\x1b[A": dict(action="MoveAhead", moveMagnitude=move_step_size),
+            "\x1b[B": dict(action="MoveBack", moveMagnitude=move_step_size),
             "\x1b[1;2A": dict(action="LookUp"),
             "\x1b[1;2B": dict(action="LookDown"),
             "i": dict(action="LookUp"),
@@ -103,6 +104,9 @@ class InteractiveControllerPrompt(object):
 
         command_message = u"Enter a Command: Move \u2190\u2191\u2192\u2193, Rotate/Look Shift + \u2190\u2191\u2192\u2193, Quit 'q' or Ctrl-C"
         print(command_message)
+        
+        agent_logs = []
+        
         for a in self.next_interact_command():
             new_commands = {}
             command_counter = dict(counter=1)
@@ -197,6 +201,9 @@ class InteractiveControllerPrompt(object):
             self._interact_commands = default_interact_commands.copy()
             self._interact_commands.update(new_commands)
 
+            # from pprint import pprint
+            # pprint(event.metadata.keys())
+            agent_logs.append(event.metadata["agent"])
             print("Position: {}".format(event.metadata["agent"]["position"]))
             print(command_message)
             print("Visible Objects:\n" + "\n".join(sorted(visible_objects)))
@@ -214,6 +221,8 @@ class InteractiveControllerPrompt(object):
                     command_info.append("%s: %s" % (ak, av))
 
                 print(" ".join(command_info))
+                
+        return agent_logs
 
     def next_interact_command(self):
 

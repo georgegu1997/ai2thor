@@ -503,6 +503,7 @@ class Controller(object):
             has_object_actions=True,
             image_dir=image_dir,
             image_per_frame=save_image_per_frame,
+            move_step_size=unity_initialization_parameters.get("gridSize", 0.25),
         )
 
         if not start_unity:
@@ -898,7 +899,7 @@ class Controller(object):
         color_frame=False,
         metadata=False,
     ):
-        self.interactive_controller.interact(
+        return self.interactive_controller.interact(
             self,
             semantic_segmentation_frame,
             instance_segmentation_frame,
